@@ -1,0 +1,519 @@
+openapi: 3.0.0
+info:
+  title: API de Gestión de Solicitudes Académicas
+  description: Sistema de Triage para la gestión de solicitudes académicas
+  version: 1.1.0
+
+servers:
+  - url: http://localhost:8080/api/v1
+
+security:
+  - BearerAuth: []
+
+tags:
+  - name: Solicitudes
+  - name: Transiciones
+  - name: IA
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    TipoSolicitud:
+      type: string
+      enum: [REGISTRO_ASIGNATURAS, HOMOLOGACION, CANCELACION_ASIGNATURAS, SOLICITUD_CUPOS, CONSULTA_ACADEMICA]
+
+    CanalOrigen:
+      type: string
+      enum: [CSU, CORREO, SAC, TELEFONICO, PRESENCIAL]
+
+    EstadoSolicitud:
+      type: string
+      enum: [REGISTRADA, CLASIFICADA, EN_ATENCION, ATENDIDA, CERRADA]
+
+    Prioridad:
+      type: string
+      enum: [ALTA, MEDIA, BAJA, CRITICA]
+
+    Solicitud:
+      type: object
+      properties:
+        id:
+          type: integer
+        tipo:
+          $ref: '#/components/schemas/TipoSolicitud'
+        descripcion:
+          type: string
+        canalOrigen:
+          $ref: '#/components/schemas/CanalOrigen'
+        fechaRegistro:
+          type: string
+          format: date-time
+        solicitanteId:
+          type: integer
+        estado:
+          $ref: '#/components/schemas/EstadoSolicitud'
+        prioridad:
+          $ref: '#/components/schemas/Prioridad'
+        responsableId:
+          type: integer
+          nullable: true
+        observaciones:
+          type: string
+          nullable: true
+        version:
+          type: integer
+
+    SolicitudRequest:
+      type: object
+      required: [tipo, descripcion, canalOrigen, solicitanteId]
+      properties:
+        tipo:
+          $ref: '#/components/schemas/TipoSolicitud'
+        descripcion:
+          type: string
+        canalOrigen:
+          $ref: '#/components/schemas/CanalOrigen'
+        solicitanteId:
+          type: integer
+
+    VersionRequest:
+      type: object
+      required: [version]
+      properties:
+        version:
+          type: integer
+
+    ClasificarRequest:
+      allOf:
+        - $ref: '#/components/schemas/VersionRequest'
+        - type: object
+          required: [tipo]
+          properties:
+            tipo:
+              $ref: '#/components/schemas/TipoSolicitud'
+
+    PriorizarRequest:
+      allOf:
+        - $ref: '#/components/schemas/VersionRequest'
+        - type: object
+          required: [prioridad]
+          properties:
+            prioridad:
+              $ref: '#/components/schemas/Prioridad'
+            justificacion:
+              type: string
+
+    AsignarRequest:
+      allOf:
+        - $ref: '#/components/schemas/VersionRequest'
+        - type: object
+          required: [responsableId]
+          properties:
+            responsableId:
+              type: integer
+
+    AtenderRequest:
+      allOf:
+        - $ref: '#/components/schemas/VersionRequest'
+        - type: object
+          required: [observacion]
+          properties:
+            observacion:
+              type: string
+
+    CerrarRequest:
+      allOf:
+        - $ref: '#/components/schemas/VersionRequest'
+        - type: object
+          required: [observacion]
+          properties:
+            observacion:
+              type: string
+
+    HistorialItem:
+      type: object
+      properties:
+        fecha:
+          type: string
+          format: date-time
+        accion:
+          type: string
+        usuario:
+          type: string
+        observaciones:
+          type: string
+          nullable: true
+
+    SugerenciaIARequest:
+      type: object
+      required: [descripcion]
+      properties:
+        descripcion:
+          type: string
+
+    SugerenciaIAResponse:
+      type: object
+      properties:
+        tipoSugerido:
+          $ref: '#/components/schemas/TipoSolicitud'
+        prioridadSugerida:
+          $ref: '#/components/schemas/Prioridad'
+        confianza:
+          type: number
+          format: float
+        explicacion:
+          type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+        status:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Solicitud inválida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Unauthorized:
+      description: No autenticado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: No autorizado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Conflicto de estado o concurrencia
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InternalError:
+      description: Error interno del servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ServiceUnavailable:
+      description: Servicio no disponible
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+paths:
+  /solicitudes:
+    post:
+      tags: [Solicitudes]
+      summary: Registrar solicitud
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SolicitudRequest'
+      responses:
+        '201':
+          description: Solicitud creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Solicitud'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '500': { $ref: '#/components/responses/InternalError' }
+
+    get:
+      tags: [Solicitudes]
+      summary: Listar solicitudes
+      parameters:
+        - name: estado
+          in: query
+          schema:
+            $ref: '#/components/schemas/EstadoSolicitud'
+        - name: tipo
+          in: query
+          schema:
+            $ref: '#/components/schemas/TipoSolicitud'
+        - name: responsableId
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de solicitudes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Solicitud'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /solicitudes/{id}:
+    get:
+      tags: [Solicitudes]
+      summary: Obtener solicitud
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Solicitud encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Solicitud'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /solicitudes/{id}/clasificar:
+    patch:
+      tags: [Transiciones]
+      summary: Clasificar solicitud
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClasificarRequest'
+      responses:
+        '200':
+          description: Solicitud clasificada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Solicitud'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /solicitudes/{id}/priorizar:
+    patch:
+      tags: [Transiciones]
+      summary: Priorizar solicitud
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PriorizarRequest'
+      responses:
+        '200':
+          description: Prioridad asignada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Solicitud'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /solicitudes/{id}/asignar:
+    patch:
+      tags: [Transiciones]
+      summary: Asignar responsable
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AsignarRequest'
+      responses:
+        '200':
+          description: Responsable asignado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Solicitud'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /solicitudes/{id}/iniciar-atencion:
+    patch:
+      tags: [Transiciones]
+      summary: Iniciar atención
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VersionRequest'
+      responses:
+        '200':
+          description: Solicitud en atención
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Solicitud'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /solicitudes/{id}/atender:
+    patch:
+      tags: [Transiciones]
+      summary: Registrar atención
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AtenderRequest'
+      responses:
+        '200':
+          description: Solicitud atendida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Solicitud'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /solicitudes/{id}/historial:
+    get:
+      tags: [Solicitudes]
+      summary: Ver historial
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Historial de la solicitud
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HistorialItem'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /solicitudes/{id}/cerrar:
+    patch:
+      tags: [Transiciones]
+      summary: Cerrar solicitud
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CerrarRequest'
+      responses:
+        '200':
+          description: Solicitud cerrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Solicitud'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /solicitudes/sugerir:
+    post:
+      tags: [IA]
+      summary: Sugerir clasificación con IA
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SugerenciaIARequest'
+      responses:
+        '200':
+          description: Sugerencia generada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SugerenciaIAResponse'
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '503': { $ref: '#/components/responses/ServiceUnavailable' }
