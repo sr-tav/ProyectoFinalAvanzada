@@ -7,13 +7,20 @@ import co.edu.uniquindio.proyectotriagesolicitud.dto.request.ClasificarRequest;
 import co.edu.uniquindio.proyectotriagesolicitud.dto.request.PriorizarRequest;
 import co.edu.uniquindio.proyectotriagesolicitud.dto.request.SolicitudRequest;
 import co.edu.uniquindio.proyectotriagesolicitud.dto.request.VersionRequest;
+import co.edu.uniquindio.proyectotriagesolicitud.dto.response.HistorialItemResponse;
+import co.edu.uniquindio.proyectotriagesolicitud.dto.response.SolicitudResponse;
 import co.edu.uniquindio.proyectotriagesolicitud.exception.BusinessException;
 import co.edu.uniquindio.proyectotriagesolicitud.exception.ResourceNotFoundException;
 import co.edu.uniquindio.proyectotriagesolicitud.model.EstadoSolicitud;
 import co.edu.uniquindio.proyectotriagesolicitud.model.HistorialSolicitud;
+import co.edu.uniquindio.proyectotriagesolicitud.model.Prioridad;
+import co.edu.uniquindio.proyectotriagesolicitud.model.RolUsuario;
 import co.edu.uniquindio.proyectotriagesolicitud.model.SolicitudAcademica;
+import co.edu.uniquindio.proyectotriagesolicitud.model.TipoSolicitud;
+import co.edu.uniquindio.proyectotriagesolicitud.model.Usuario;
 import co.edu.uniquindio.proyectotriagesolicitud.repository.HistorialSolicitudRepository;
 import co.edu.uniquindio.proyectotriagesolicitud.repository.SolicitudRepository;
+import co.edu.uniquindio.proyectotriagesolicitud.repository.UsuarioRepository;
 import co.edu.uniquindio.proyectotriagesolicitud.service.SolicitudService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -26,15 +33,25 @@ public class SolicitudServiceImpl implements SolicitudService {
 
     private final SolicitudRepository solicitudRepository;
     private final HistorialSolicitudRepository historialSolicitudRepository;
+    private final UsuarioRepository usuarioRepository;
 
     public SolicitudServiceImpl(SolicitudRepository solicitudRepository,
-                                HistorialSolicitudRepository historialSolicitudRepository) {
+                                HistorialSolicitudRepository historialSolicitudRepository,
+                                UsuarioRepository usuarioRepository) {
         this.solicitudRepository = solicitudRepository;
         this.historialSolicitudRepository = historialSolicitudRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @Override
-    public SolicitudAcademica registrarSolicitud(SolicitudRequest request) {
+    public SolicitudResponse registrarSolicitud(SolicitudRequest request) {
+        Usuario solicitante = obtenerUsuarioActivo(request.getSolicitanteId());
+        validarRol(solicitante,
+                RolUsuario.ESTUDIANTE,
+                RolUsuario.FUNCIONARIO,
+                RolUsuario.COORDINADOR,
+                RolUsuario.ADMIN);
+
         SolicitudAcademica solicitud = new SolicitudAcademica();
         solicitud.setTipo(request.getTipo());
         solicitud.setDescripcion(request.getDescripcion());
@@ -51,11 +68,14 @@ public class SolicitudServiceImpl implements SolicitudService {
                 "Solicitud registrada en el sistema"
         );
 
-        return guardada;
+        return toSolicitudResponse(guardada);
     }
 
     @Override
-    public SolicitudAcademica clasificarSolicitud(Long id, ClasificarRequest request) {
+    public SolicitudResponse clasificarSolicitud(Long id, ClasificarRequest request) {
+        Usuario actor = obtenerUsuarioActivo(request.getUsuarioResponsableId());
+        validarRol(actor, RolUsuario.FUNCIONARIO, RolUsuario.COORDINADOR, RolUsuario.ADMIN);
+
         SolicitudAcademica solicitud = obtenerSolicitudExistente(id);
         validarNoCerrada(solicitud);
         validarVersion(solicitud, request.getVersion());
@@ -76,11 +96,14 @@ public class SolicitudServiceImpl implements SolicitudService {
                 request.getObservacion()
         );
 
-        return actualizada;
+        return toSolicitudResponse(actualizada);
     }
 
     @Override
-    public SolicitudAcademica priorizarSolicitud(Long id, PriorizarRequest request) {
+    public SolicitudResponse priorizarSolicitud(Long id, PriorizarRequest request) {
+        Usuario actor = obtenerUsuarioActivo(request.getUsuarioResponsableId());
+        validarRol(actor, RolUsuario.FUNCIONARIO, RolUsuario.COORDINADOR, RolUsuario.ADMIN);
+
         SolicitudAcademica solicitud = obtenerSolicitudExistente(id);
         validarNoCerrada(solicitud);
         validarVersion(solicitud, request.getVersion());
@@ -89,6 +112,8 @@ public class SolicitudServiceImpl implements SolicitudService {
                 && solicitud.getEstado() != EstadoSolicitud.EN_ATENCION) {
             throw new BusinessException("Solo se puede priorizar una solicitud clasificada o en atención");
         }
+
+        validarReglasPrioridad(solicitud, request.getPrioridad(), request.getJustificacion());
 
         solicitud.setPrioridad(request.getPrioridad());
         solicitud.setObservaciones(request.getJustificacion());
@@ -102,17 +127,26 @@ public class SolicitudServiceImpl implements SolicitudService {
                 request.getJustificacion()
         );
 
-        return actualizada;
+        return toSolicitudResponse(actualizada);
     }
 
     @Override
-    public SolicitudAcademica asignarSolicitud(Long id, AsignarRequest request) {
+    public SolicitudResponse asignarSolicitud(Long id, AsignarRequest request) {
+        Usuario actor = obtenerUsuarioActivo(request.getUsuarioResponsableId());
+        validarRol(actor, RolUsuario.FUNCIONARIO, RolUsuario.COORDINADOR, RolUsuario.ADMIN);
+
         SolicitudAcademica solicitud = obtenerSolicitudExistente(id);
         validarNoCerrada(solicitud);
         validarVersion(solicitud, request.getVersion());
 
         if (request.getResponsableId() == null) {
             throw new BusinessException("El responsableId es obligatorio");
+        }
+
+        Usuario responsable = obtenerUsuarioActivo(request.getResponsableId());
+
+        if (responsable.getRolUsuario() == RolUsuario.ESTUDIANTE) {
+            throw new BusinessException("No se puede asignar una solicitud a un estudiante");
         }
 
         solicitud.setResponsableId(request.getResponsableId());
@@ -126,11 +160,14 @@ public class SolicitudServiceImpl implements SolicitudService {
                 request.getObservacion()
         );
 
-        return actualizada;
+        return toSolicitudResponse(actualizada);
     }
 
     @Override
-    public SolicitudAcademica iniciarAtencion(Long id, VersionRequest request) {
+    public SolicitudResponse iniciarAtencion(Long id, VersionRequest request) {
+        Usuario actor = obtenerUsuarioActivo(request.getUsuarioResponsableId());
+        validarRol(actor, RolUsuario.FUNCIONARIO, RolUsuario.COORDINADOR, RolUsuario.ADMIN);
+
         SolicitudAcademica solicitud = obtenerSolicitudExistente(id);
         validarNoCerrada(solicitud);
         validarVersion(solicitud, request.getVersion());
@@ -154,11 +191,14 @@ public class SolicitudServiceImpl implements SolicitudService {
                 "La solicitud pasó a estado EN_ATENCION"
         );
 
-        return actualizada;
+        return toSolicitudResponse(actualizada);
     }
 
     @Override
-    public SolicitudAcademica atenderSolicitud(Long id, AtenderRequest request) {
+    public SolicitudResponse atenderSolicitud(Long id, AtenderRequest request) {
+        Usuario actor = obtenerUsuarioActivo(request.getUsuarioResponsableId());
+        validarRol(actor, RolUsuario.FUNCIONARIO, RolUsuario.COORDINADOR, RolUsuario.ADMIN);
+
         SolicitudAcademica solicitud = obtenerSolicitudExistente(id);
         validarNoCerrada(solicitud);
         validarVersion(solicitud, request.getVersion());
@@ -179,11 +219,14 @@ public class SolicitudServiceImpl implements SolicitudService {
                 request.getObservacion()
         );
 
-        return actualizada;
+        return toSolicitudResponse(actualizada);
     }
 
     @Override
-    public SolicitudAcademica cerrarSolicitud(Long id, CerrarRequest request) {
+    public SolicitudResponse cerrarSolicitud(Long id, CerrarRequest request) {
+        Usuario actor = obtenerUsuarioActivo(request.getUsuarioResponsableId());
+        validarRol(actor, RolUsuario.COORDINADOR, RolUsuario.ADMIN);
+
         SolicitudAcademica solicitud = obtenerSolicitudExistente(id);
         validarVersion(solicitud, request.getVersion());
 
@@ -207,28 +250,100 @@ public class SolicitudServiceImpl implements SolicitudService {
                 request.getObservacion()
         );
 
-        return actualizada;
+        return toSolicitudResponse(actualizada);
     }
 
     @Override
-    public SolicitudAcademica obtenerSolicitudPorId(Long id) {
-        return obtenerSolicitudExistente(id);
+    public SolicitudResponse obtenerSolicitudPorId(Long id) {
+        return toSolicitudResponse(obtenerSolicitudExistente(id));
     }
 
     @Override
-    public List<SolicitudAcademica> listarSolicitudes() {
-        return solicitudRepository.findAll();
+    public List<SolicitudResponse> listarSolicitudes() {
+        return solicitudRepository.findAll()
+                .stream()
+                .map(this::toSolicitudResponse)
+                .toList();
     }
 
     @Override
-    public List<HistorialSolicitud> obtenerHistorial(Long solicitudId) {
+    public List<SolicitudResponse> listarSolicitudes(
+            EstadoSolicitud estado,
+            TipoSolicitud tipo,
+            Long responsableId,
+            Prioridad prioridad) {
+
+        List<SolicitudAcademica> lista = solicitudRepository.findAll();
+
+        return lista.stream()
+                .filter(s -> estado == null || s.getEstado() == estado)
+                .filter(s -> tipo == null || s.getTipo() == tipo)
+                .filter(s -> responsableId == null ||
+                        (s.getResponsableId() != null && s.getResponsableId().equals(responsableId)))
+                .filter(s -> prioridad == null || s.getPrioridad() == prioridad)
+                .map(this::toSolicitudResponse)
+                .toList();
+    }
+
+    @Override
+    public List<HistorialItemResponse> obtenerHistorial(Long solicitudId) {
         obtenerSolicitudExistente(solicitudId);
-        return historialSolicitudRepository.findBySolicitudId(solicitudId);
+
+        return historialSolicitudRepository.findBySolicitudId(solicitudId)
+                .stream()
+                .map(this::toHistorialItemResponse)
+                .toList();
     }
 
     private SolicitudAcademica obtenerSolicitudExistente(Long id) {
         return solicitudRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("No se encontró la solicitud con id: " + id));
+    }
+
+    private Usuario obtenerUsuarioActivo(Long usuarioId) {
+        if (usuarioId == null) {
+            throw new BusinessException("El id del usuario es obligatorio");
+        }
+
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new BusinessException("El usuario no existe"));
+
+        if (!usuario.isActivo()) {
+            throw new BusinessException("El usuario no está activo");
+        }
+
+        return usuario;
+    }
+
+    private void validarRol(Usuario usuario, RolUsuario... rolesPermitidos) {
+        for (RolUsuario rol : rolesPermitidos) {
+            if (usuario.getRolUsuario() == rol) {
+                return;
+            }
+        }
+        throw new BusinessException("El usuario no tiene permisos para realizar esta operación");
+    }
+
+    private void validarReglasPrioridad(SolicitudAcademica solicitud,
+                                        Prioridad prioridad,
+                                        String justificacion) {
+        if (prioridad == null) {
+            throw new BusinessException("La prioridad es obligatoria");
+        }
+
+        if (justificacion == null || justificacion.isBlank()) {
+            throw new BusinessException("La justificación de la prioridad es obligatoria");
+        }
+
+        if (solicitud.getTipo() == TipoSolicitud.CONSULTA_ACADEMICA
+                && prioridad == Prioridad.CRITICA) {
+            throw new BusinessException("Una consulta académica no puede asignarse con prioridad CRITICA");
+        }
+
+        if (solicitud.getTipo() == TipoSolicitud.SOLICITUD_CUPOS
+                && prioridad == Prioridad.BAJA) {
+            throw new BusinessException("Una solicitud de cupos no puede asignarse con prioridad BAJA");
+        }
     }
 
     private void validarNoCerrada(SolicitudAcademica solicitud) {
@@ -258,5 +373,32 @@ public class SolicitudServiceImpl implements SolicitudService {
         historial.setObservacion(observacion);
 
         historialSolicitudRepository.save(historial);
+    }
+
+    private SolicitudResponse toSolicitudResponse(SolicitudAcademica solicitud) {
+        SolicitudResponse response = new SolicitudResponse();
+        response.setId(solicitud.getId());
+        response.setTipo(solicitud.getTipo());
+        response.setDescripcion(solicitud.getDescripcion());
+        response.setCanalOrigen(solicitud.getCanalOrigen());
+        response.setFechaRegistro(solicitud.getFechaRegistro());
+        response.setSolicitanteId(solicitud.getSolicitanteId());
+        response.setEstado(solicitud.getEstado());
+        response.setPrioridad(solicitud.getPrioridad());
+        response.setResponsableId(solicitud.getResponsableId());
+        response.setObservaciones(solicitud.getObservaciones());
+        response.setVersion(solicitud.getVersion());
+        return response;
+    }
+
+    private HistorialItemResponse toHistorialItemResponse(HistorialSolicitud historial) {
+        HistorialItemResponse response = new HistorialItemResponse();
+        response.setFecha(historial.getFechaHora());
+        response.setAccion(historial.getAccion());
+        response.setUsuario(historial.getUsuarioResponsableId() != null
+                ? historial.getUsuarioResponsableId().toString()
+                : null);
+        response.setObservaciones(historial.getObservacion());
+        return response;
     }
 }

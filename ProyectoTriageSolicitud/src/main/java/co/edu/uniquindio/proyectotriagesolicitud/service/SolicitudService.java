@@ -7,30 +7,40 @@ import co.edu.uniquindio.proyectotriagesolicitud.dto.request.ClasificarRequest;
 import co.edu.uniquindio.proyectotriagesolicitud.dto.request.PriorizarRequest;
 import co.edu.uniquindio.proyectotriagesolicitud.dto.request.SolicitudRequest;
 import co.edu.uniquindio.proyectotriagesolicitud.dto.request.VersionRequest;
-import co.edu.uniquindio.proyectotriagesolicitud.model.HistorialSolicitud;
-import co.edu.uniquindio.proyectotriagesolicitud.model.SolicitudAcademica;
+import co.edu.uniquindio.proyectotriagesolicitud.dto.response.HistorialItemResponse;
+import co.edu.uniquindio.proyectotriagesolicitud.dto.response.SolicitudResponse;
+import co.edu.uniquindio.proyectotriagesolicitud.model.EstadoSolicitud;
+import co.edu.uniquindio.proyectotriagesolicitud.model.Prioridad;
+import co.edu.uniquindio.proyectotriagesolicitud.model.TipoSolicitud;
 
 import java.util.List;
 
 public interface SolicitudService {
 
-    SolicitudAcademica registrarSolicitud(SolicitudRequest request);
+    SolicitudResponse registrarSolicitud(SolicitudRequest request);
 
-    SolicitudAcademica clasificarSolicitud(Long id, ClasificarRequest request);
+    SolicitudResponse clasificarSolicitud(Long id, ClasificarRequest request);
 
-    SolicitudAcademica priorizarSolicitud(Long id, PriorizarRequest request);
+    SolicitudResponse priorizarSolicitud(Long id, PriorizarRequest request);
 
-    SolicitudAcademica asignarSolicitud(Long id, AsignarRequest request);
+    SolicitudResponse asignarSolicitud(Long id, AsignarRequest request);
 
-    SolicitudAcademica iniciarAtencion(Long id, VersionRequest request);
+    SolicitudResponse iniciarAtencion(Long id, VersionRequest request);
 
-    SolicitudAcademica atenderSolicitud(Long id, AtenderRequest request);
+    SolicitudResponse atenderSolicitud(Long id, AtenderRequest request);
 
-    SolicitudAcademica cerrarSolicitud(Long id, CerrarRequest request);
+    SolicitudResponse cerrarSolicitud(Long id, CerrarRequest request);
 
-    SolicitudAcademica obtenerSolicitudPorId(Long id);
+    SolicitudResponse obtenerSolicitudPorId(Long id);
 
-    List<SolicitudAcademica> listarSolicitudes();
+    List<SolicitudResponse> listarSolicitudes();
 
-    List<HistorialSolicitud> obtenerHistorial(Long solicitudId);
+    List<SolicitudResponse> listarSolicitudes(
+            EstadoSolicitud estado,
+            TipoSolicitud tipo,
+            Long responsableId,
+            Prioridad prioridad
+    );
+
+    List<HistorialItemResponse> obtenerHistorial(Long solicitudId);
 }
