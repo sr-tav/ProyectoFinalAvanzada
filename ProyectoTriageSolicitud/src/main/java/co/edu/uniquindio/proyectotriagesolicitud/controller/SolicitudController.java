@@ -16,6 +16,7 @@ import co.edu.uniquindio.proyectotriagesolicitud.model.Prioridad;
 import co.edu.uniquindio.proyectotriagesolicitud.model.TipoSolicitud;
 import co.edu.uniquindio.proyectotriagesolicitud.service.AsistenteIAService;
 import co.edu.uniquindio.proyectotriagesolicitud.service.SolicitudService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,14 +37,14 @@ public class SolicitudController {
     }
 
     @PostMapping
-    public ResponseEntity<SolicitudResponse> registrarSolicitud(@RequestBody SolicitudRequest request) {
+    public ResponseEntity<SolicitudResponse> registrarSolicitud(@Valid @RequestBody SolicitudRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(solicitudService.registrarSolicitud(request));
     }
 
     @PatchMapping("/{id}/clasificar")
     public ResponseEntity<SolicitudResponse> clasificarSolicitud(@PathVariable Long id,
-                                                                 @RequestBody ClasificarRequest request) {
+                                                                 @Valid @RequestBody ClasificarRequest request) {
         return ResponseEntity.ok(
                 solicitudService.clasificarSolicitud(id, request)
         );
@@ -51,7 +52,7 @@ public class SolicitudController {
 
     @PatchMapping("/{id}/priorizar")
     public ResponseEntity<SolicitudResponse> priorizarSolicitud(@PathVariable Long id,
-                                                                @RequestBody PriorizarRequest request) {
+                                                                @Valid @RequestBody PriorizarRequest request) {
         return ResponseEntity.ok(
                 solicitudService.priorizarSolicitud(id, request)
         );
@@ -59,7 +60,7 @@ public class SolicitudController {
 
     @PatchMapping("/{id}/asignar")
     public ResponseEntity<SolicitudResponse> asignarSolicitud(@PathVariable Long id,
-                                                              @RequestBody AsignarRequest request) {
+                                                              @Valid @RequestBody AsignarRequest request) {
         return ResponseEntity.ok(
                 solicitudService.asignarSolicitud(id, request)
         );
@@ -67,7 +68,7 @@ public class SolicitudController {
 
     @PatchMapping("/{id}/iniciar-atencion")
     public ResponseEntity<SolicitudResponse> iniciarAtencion(@PathVariable Long id,
-                                                             @RequestBody VersionRequest request) {
+                                                             @Valid @RequestBody VersionRequest request) {
         return ResponseEntity.ok(
                 solicitudService.iniciarAtencion(id, request)
         );
@@ -75,7 +76,7 @@ public class SolicitudController {
 
     @PatchMapping("/{id}/atender")
     public ResponseEntity<SolicitudResponse> atenderSolicitud(@PathVariable Long id,
-                                                              @RequestBody AtenderRequest request) {
+                                                              @Valid @RequestBody AtenderRequest request) {
         return ResponseEntity.ok(
                 solicitudService.atenderSolicitud(id, request)
         );
@@ -83,7 +84,7 @@ public class SolicitudController {
 
     @PatchMapping("/{id}/cerrar")
     public ResponseEntity<SolicitudResponse> cerrarSolicitud(@PathVariable Long id,
-                                                             @RequestBody CerrarRequest request) {
+                                                             @Valid @RequestBody CerrarRequest request) {
         return ResponseEntity.ok(
                 solicitudService.cerrarSolicitud(id, request)
         );
@@ -116,7 +117,7 @@ public class SolicitudController {
     }
 
     @PostMapping("/sugerir")
-    public ResponseEntity<SugerenciaIAResponse> sugerir(@RequestBody SugerenciaIARequest request) {
+    public ResponseEntity<SugerenciaIAResponse> sugerir(@Valid @RequestBody SugerenciaIARequest request) {
         return ResponseEntity.ok(
                 asistenteIAService.sugerir(request)
         );
