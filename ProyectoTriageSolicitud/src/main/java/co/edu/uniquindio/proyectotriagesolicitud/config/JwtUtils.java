@@ -38,15 +38,15 @@ public class JwtUtils {
                 .subject(usuario.getId().toString())
                 .claim("email", usuario.getCorreo())
                 .claim("nombre", usuario.getNombre())
-                .claim("rol", usuario.getRolUsuario())
+                .claim("rol", usuario.getRolUsuario().name())
                 .issuedAt(ahora)
                 .expiration(expiracion)
                 .signWith(secretKey)
                 .compact();
     }
 
-    public UUID obtenerUsuarioId(String token) {
-        return UUID.fromString(parseClaims(token).getSubject());
+    public Long obtenerUsuarioId(String token) {
+        return Long.valueOf(parseClaims(token).getSubject());
     }
 
     public String obtenerRol(String token) {
