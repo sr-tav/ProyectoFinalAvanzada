@@ -1,0 +1,87 @@
+<app-navbar title="Triage Académico"></app-navbar>
+
+<div class="page-wrapper">
+  <div class="page-content">
+    <div class="header-row">
+      <h1 class="page-title" style="margin-bottom:0">Mis Solicitudes</h1>
+      <a class="btn btn-primary btn-sm" routerLink="/usuario/crear-solicitud">+ Nueva Solicitud</a>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+      <!-- Loading -->
+      <div class="empty-state" *ngIf="loading">
+        <div class="spinner-inline" style="width:28px;height:28px;border-width:3px"></div>
+        <p style="margin-top:12px">Cargando solicitudes...</p>
+      </div>
+
+      <!-- Error -->
+      <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+      <!-- Empty -->
+      <div class="empty-state" *ngIf="!loading && !error && solicitudes.length === 0">
+        <div class="empty-icon">📋</div>
+        <p>No tienes solicitudes registradas aún.</p>
+        <a class="btn btn-primary btn-sm" style="margin-top:14px" routerLink="/usuario/crear-solicitud">Crear primera solicitud</a>
+      </div>
+
+      <!-- Tabla -->
+      <table class="data-table" *ngIf="!loading && solicitudes.length > 0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Tipo</th>
+            <th>Estado</th>
+            <th>Prioridad</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of solicitudes">
+            <td style="color:#888;font-size:.8rem">{{ s.id }}</td>
+            <td>{{ tipoLabels[s.tipo] ?? s.tipo }}</td>
+            <td><span [class]="badgeEstado(s.estado)">{{ s.estado }}</span></td>
+            <td>
+              <span *ngIf="s.prioridad" [class]="badgePrioridad(s.prioridad)">{{ s.prioridad }}</span>
+              <span *ngIf="!s.prioridad" style="color:#555;font-size:.75rem">—</span>
+            </td>
+            <td style="font-size:.78rem;color:#888">{{ s.fechaRegistro | date:'dd/MM/yy HH:mm' }}</td>
+            <td>
+              <button class="btn btn-ghost btn-sm" (click)="verDetalle(s)">Ver</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detalle -->
+<div class="modal-overlay" *ngIf="selectedSolicitud" (click)="cerrarDetalle()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 class="modal-title">Detalle de Solicitud #{{ selectedSolicitud.id }}</h2>
+      <span [class]="badgeEstado(selectedSolicitud.estado)">{{ selectedSolicitud.estado }}</span>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-item"><span class="detail-label">Tipo</span><span>{{ tipoLabels[selectedSolicitud.tipo] }}</span></div>
+      <div class="detail-item"><span class="detail-label">Canal</span><span>{{ selectedSolicitud.canalOrigen }}</span></div>
+      <div class="detail-item"><span class="detail-label">Prioridad</span>
+        <span *ngIf="selectedSolicitud.prioridad" [class]="badgePrioridad(selectedSolicitud.prioridad)">{{ selectedSolicitud.prioridad }}</span>
+        <span *ngIf="!selectedSolicitud.prioridad">Sin asignar</span>
+      </div>
+      <div class="detail-item"><span class="detail-label">Fecha</span><span>{{ selectedSolicitud.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</span></div>
+    </div>
+    <div class="detail-desc">
+      <span class="detail-label">Descripción</span>
+      <p>{{ selectedSolicitud.descripcion }}</p>
+    </div>
+    <div class="detail-desc" *ngIf="selectedSolicitud.observaciones">
+      <span class="detail-label">Observaciones del responsable</span>
+      <p>{{ selectedSolicitud.observaciones }}</p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" (click)="cerrarDetalle()">Cerrar</button>
+    </div>
+  </div>
+</div>

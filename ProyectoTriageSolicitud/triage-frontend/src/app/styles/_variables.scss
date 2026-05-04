@@ -1,0 +1,36 @@
+// ─── Color Palette ───────────────────────────────────────────
+$bg-deep:      #0f0e15;
+$bg-surface:   #181621;
+$bg-card:      rgba(28, 26, 40, 0.92);
+$bg-elevated:  rgba(38, 35, 56, 0.95);
+
+$accent:       #7c5cbf;
+$accent-light: #a07de0;
+$accent-glow:  rgba(124, 92, 191, 0.3);
+
+$danger:       #c0525a;
+$warning:      #c48a2e;
+$success:      #3fa878;
+$info:         #3a7abf;
+
+$text-primary: #e8e4f0;
+$text-secondary:#b0a8c8;
+$text-muted:   #6e6886;
+
+$border:       rgba(255,255,255,0.07);
+$border-focus: rgba(124, 92, 191, 0.5);
+
+// ─── Priority colors ─────────────────────────────────────────
+$critica: #c0525a;
+$alta:    #c48a2e;
+$media:   #3a7abf;
+$baja:    #3fa878;
+
+// ─── Typography ──────────────────────────────────────────────
+$font-display: 'Syne', sans-serif;
+$font-body:    'DM Sans', sans-serif;
+
+// ─── Spacing ─────────────────────────────────────────────────
+$navbar-h: 64px;
+$radius:   12px;
+$radius-lg:18px;

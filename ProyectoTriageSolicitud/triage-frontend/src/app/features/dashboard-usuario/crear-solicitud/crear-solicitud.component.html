@@ -1,0 +1,75 @@
+<app-navbar title="Triage Académico"></app-navbar>
+
+<div class="page-wrapper">
+  <div class="page-content">
+    <h1 class="page-title">Nueva Solicitud</h1>
+
+    <div class="card form-card">
+      <div class="alert alert-success" *ngIf="success">
+        ✓ Solicitud registrada exitosamente. Puedes ver su estado en "Mis Solicitudes".
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" *ngIf="!success">
+        <!-- Descripción + IA -->
+        <div class="form-group">
+          <label>Descripción <span class="required">*</span></label>
+          <textarea formControlName="descripcion" placeholder="Describe detalladamente tu solicitud..."></textarea>
+        </div>
+
+        <!-- Botón IA -->
+        <div class="ia-row">
+          <button type="button" class="btn btn-ghost btn-sm ia-btn" (click)="sugerirIA()" [disabled]="loadingIA || (form.get('descripcion')?.value?.length ?? 0) < 10">
+            <span *ngIf="!loadingIA">✦ Sugerir tipo con IA</span>
+            <span *ngIf="loadingIA"><span class="spinner-inline"></span> Analizando...</span>
+          </button>
+          <span class="ia-hint">La IA analizará tu descripción para sugerir el tipo y prioridad</span>
+        </div>
+
+        <!-- Sugerencia IA -->
+        <div class="ia-card" *ngIf="sugerenciaIA">
+          <div class="ia-card-header">
+            <span class="ia-label">✦ Sugerencia IA</span>
+            <span class="ia-conf">Confianza: {{ (sugerenciaIA.confianza * 100) | number:'1.0-0' }}%</span>
+          </div>
+          <div class="ia-detail">
+            <span>Tipo sugerido: <strong>{{ sugerenciaIA.tipoSugerido }}</strong></span>
+            <span>Prioridad: <strong>{{ sugerenciaIA.prioridadSugerida }}</strong></span>
+          </div>
+          <p class="ia-explicacion">{{ sugerenciaIA.explicacion }}</p>
+          <div class="ia-actions">
+            <button type="button" class="btn btn-primary btn-sm" (click)="aplicarSugerencia()">Aplicar sugerencia</button>
+            <button type="button" class="btn btn-ghost btn-sm" (click)="sugerenciaIA = null">Descartar</button>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tipo de Solicitud <span class="required">*</span></label>
+            <select formControlName="tipo">
+              <option value="">Selecciona un tipo...</option>
+              <option *ngFor="let t of tipos" [value]="t">{{ tipoLabels[t] }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Canal de Origen <span class="required">*</span></label>
+            <select formControlName="canalOrigen">
+              <option value="">Selecciona un canal...</option>
+              <option *ngFor="let c of canales" [value]="c">{{ canalLabels[c] }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit" [disabled]="form.invalid || loading">
+            <span *ngIf="!loading">Registrar Solicitud</span>
+            <span *ngIf="loading"><span class="spinner-inline"></span> Guardando...</span>
+          </button>
+          <a class="btn btn-ghost" routerLink="/usuario/mis-solicitudes">Cancelar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

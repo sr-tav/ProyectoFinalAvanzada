@@ -1,0 +1,67 @@
+
+
+.form-card { max-width: 720px; }
+
+.required { color: #c0525a; }
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.ia-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.ia-hint { font-size: 0.72rem; color: #6e6886; }
+
+.ia-btn {
+  border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(124,92,191,0.08) !important;
+  color: #a07de0 !important;
+  &:hover { background: rgba(124,92,191,0.15) !important; }
+}
+
+.ia-card {
+  background: rgba(124,92,191,0.06);
+  border: 1px solid rgba(124,92,191,0.2);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 18px;
+}
+
+.ia-card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.ia-label { font-size: 0.75rem; font-weight: 700; color: #a07de0; letter-spacing: 0.08em; }
+.ia-conf  { font-size: 0.72rem; color: #6e6886; }
+
+.ia-detail {
+  display: flex;
+  gap: 20px;
+  font-size: 0.82rem;
+  color: #b0a8c8;
+  margin-bottom: 8px;
+  strong { color: #e8e4f0; }
+}
+
+.ia-explicacion {
+  font-size: 0.78rem;
+  color: #6e6886;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.ia-actions { display: flex; gap: 8px; }
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 24px;
+}

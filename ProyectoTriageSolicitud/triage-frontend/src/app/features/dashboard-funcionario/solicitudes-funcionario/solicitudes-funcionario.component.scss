@@ -1,0 +1,24 @@
+
+
+.filter-label {
+  font-size: .7rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: #6e6886;
+  font-weight: 600;
+  align-self: center;
+}
+
+.desc-cell {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: .82rem;
+  color: #6e6886;
+}
+
+.row-prio-critica td { border-left: 3px solid #c0525a; }
+.row-prio-alta    td { border-left: 3px solid #c48a2e; }
+.row-prio-media   td { border-left: 3px solid #3a7abf; }
+.row-prio-baja    td { border-left: 3px solid #3fa878; }

@@ -1,0 +1,91 @@
+
+
+.navbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 64px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  padding: 0 28px;
+  gap: 24px;
+  background: rgba(18, 16, 26, 0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.brand-icon {
+  font-size: 1.3rem;
+  color: #7c5cbf;
+  filter: drop-shadow(0 0 8px #7c5cbf);
+}
+.brand-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #e8e4f0;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.nav-link {
+  padding: 7px 14px;
+  border-radius: 7px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #6e6886;
+  text-decoration: none;
+  transition: color .18s, background .18s;
+  letter-spacing: 0.02em;
+
+  &:hover { color: #e8e4f0; background: rgba(255,255,255,0.05); text-decoration: none; }
+  &.active { color: #a07de0; background: rgba(124,92,191,0.3); }
+}
+
+.navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.rol-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 100px;
+  background: rgba(124,92,191,0.3);
+  color: #a07de0;
+  border: 1px solid rgba(124,92,191,0.25);
+}
+
+.btn-logout {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 7px;
+  color: #6e6886;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.78rem;
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: color .18s, border-color .18s, background .18s;
+
+  &:hover { color: #e8e4f0; border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.04); }
+}

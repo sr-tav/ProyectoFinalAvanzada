@@ -1,0 +1,55 @@
+<div class="auth-bg">
+  <!-- Orbs de fondo -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="login-card">
+    <div class="card-header">
+      <div class="logo-mark">
+        <span class="logo-icon">◈</span>
+      </div>
+      <h1 class="card-title">ACCESO AL SISTEMA</h1>
+      <p class="card-subtitle">Triage Académico · UniQuindío</p>
+    </div>
+
+    <div class="card-body">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="field-group">
+          <label class="field-label">Correo institucional</label>
+          <div class="input-wrapper">
+            <span class="input-icon">✉</span>
+            <input
+              class="field-input"
+              type="email"
+              formControlName="correo"
+              placeholder="usuario@uniquindio.edu.co"
+              autocomplete="email"
+            />
+          </div>
+          <span
+            class="field-error"
+            *ngIf="form.get('correo')?.invalid && form.get('correo')?.touched"
+          >
+            Ingresa un correo válido
+          </span>
+        </div>
+
+        <div class="alert-error" *ngIf="error">{{ error }}</div>
+
+        <button class="btn-login" type="submit" [disabled]="loading">
+          <span *ngIf="!loading">INGRESAR</span>
+          <span *ngIf="loading" class="spinner"></span>
+        </button>
+      </form>
+
+      <div class="divider">
+        <span>¿No tienes acceso?</span>
+      </div>
+
+      <a class="link-register" routerLink="/auth/register">
+        Solicitar cuenta nueva
+      </a>
+    </div>
+  </div>
+</div>

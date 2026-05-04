@@ -1,0 +1,125 @@
+<div class="modal-overlay" (click)="cerrar.emit()">
+  <div class="modal-box modal-lg" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="resp-header">
+      <div>
+        <h2 class="modal-title" style="margin-bottom:4px">Solicitud #{{ solicitud.id }}</h2>
+        <span class="tipo-label">{{ tipoLabels[solicitud.tipo] }}</span>
+      </div>
+      <div class="header-badges">
+        <span [class]="badgeEstado(solicitud.estado)">{{ solicitud.estado }}</span>
+        <span *ngIf="solicitud.prioridad" [class]="badgePrioridad(solicitud.prioridad)">{{ solicitud.prioridad }}</span>
+      </div>
+    </div>
+
+    <p class="solicitud-desc">{{ solicitud.descripcion }}</p>
+
+    <!-- Alertas -->
+    <div class="alert alert-error"   *ngIf="error">{{ error }}</div>
+    <div class="alert alert-success" *ngIf="success">{{ success }}</div>
+
+    <!-- Acciones disponibles -->
+    <div class="acciones-header">Acciones disponibles</div>
+    <div class="acciones-bar">
+      <button class="btn btn-ghost btn-sm" [class.active]="accionActiva==='clasificar'" (click)="accionActiva = puedeClasificar() ? 'clasificar' : null" [disabled]="!puedeClasificar()">Clasificar</button>
+      <button class="btn btn-ghost btn-sm" [class.active]="accionActiva==='priorizar'"  (click)="accionActiva = puedePriorizar()  ? 'priorizar'  : null" [disabled]="!puedePriorizar()">Priorizar</button>
+      <button class="btn btn-ghost btn-sm" [class.active]="accionActiva==='asignar'"    (click)="accionActiva = puedeAsignar()    ? 'asignar'    : null" [disabled]="!puedeAsignar()">Asignar</button>
+      <button class="btn btn-ghost btn-sm" [class.active]="accionActiva==='iniciar'"    (click)="accionActiva = puedeIniciar()    ? 'iniciar'    : null" [disabled]="!puedeIniciar()">Iniciar Atención</button>
+      <button class="btn btn-ghost btn-sm" [class.active]="accionActiva==='atender'"    (click)="accionActiva = puedeAtender()    ? 'atender'    : null" [disabled]="!puedeAtender()">Registrar Atención</button>
+      <button class="btn btn-danger btn-sm" [class.active]="accionActiva==='cerrar'"   (click)="accionActiva = puedeCerrar()     ? 'cerrar'     : null" [disabled]="!puedeCerrar()">Cerrar</button>
+    </div>
+
+    <!-- Paneles de acción -->
+    <div class="accion-panel" *ngIf="accionActiva === 'clasificar'">
+      <form [formGroup]="formClasificar" (ngSubmit)="ejecutar('clasificar')">
+        <div class="form-group">
+          <label>Tipo de Solicitud</label>
+          <select formControlName="tipo">
+            <option value="">Selecciona...</option>
+            <option *ngFor="let t of tipos" [value]="t">{{ tipoLabels[t] }}</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-sm" type="submit" [disabled]="formClasificar.invalid || loading">Confirmar Clasificación</button>
+      </form>
+    </div>
+
+    <div class="accion-panel" *ngIf="accionActiva === 'priorizar'">
+      <form [formGroup]="formPriorizar" (ngSubmit)="ejecutar('priorizar')">
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Prioridad</label>
+            <select formControlName="prioridad">
+              <option value="">Selecciona...</option>
+              <option *ngFor="let p of prioridades" [value]="p">{{ p }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Justificación</label>
+            <input type="text" formControlName="justificacion" placeholder="Razón de la prioridad..." />
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm" type="submit" [disabled]="formPriorizar.invalid || loading">Asignar Prioridad</button>
+      </form>
+    </div>
+
+    <div class="accion-panel" *ngIf="accionActiva === 'asignar'">
+      <form [formGroup]="formAsignar" (ngSubmit)="ejecutar('asignar')">
+        <div class="form-group">
+          <label>ID del Responsable</label>
+          <input type="number" formControlName="responsableId" placeholder="Ej: 3" />
+        </div>
+        <button class="btn btn-primary btn-sm" type="submit" [disabled]="formAsignar.invalid || loading">Asignar Responsable</button>
+      </form>
+    </div>
+
+    <div class="accion-panel" *ngIf="accionActiva === 'iniciar'">
+      <p style="font-size:.84rem;color:#aaa;margin-bottom:12px">Esto cambiará el estado a <strong>EN ATENCIÓN</strong>.</p>
+      <button class="btn btn-primary btn-sm" (click)="ejecutar('iniciar')" [disabled]="loading">Confirmar</button>
+    </div>
+
+    <div class="accion-panel" *ngIf="accionActiva === 'atender'">
+      <form [formGroup]="formAtender" (ngSubmit)="ejecutar('atender')">
+        <div class="form-group">
+          <label>Observación de atención</label>
+          <textarea formControlName="observacion" placeholder="Detalla la atención brindada..."></textarea>
+        </div>
+        <button class="btn btn-primary btn-sm" type="submit" [disabled]="formAtender.invalid || loading">Registrar Atención</button>
+      </form>
+    </div>
+
+    <div class="accion-panel" *ngIf="accionActiva === 'cerrar'">
+      <form [formGroup]="formCerrar" (ngSubmit)="ejecutar('cerrar')">
+        <div class="form-group">
+          <label>Observación de cierre</label>
+          <textarea formControlName="observacion" placeholder="Indica la resolución final..."></textarea>
+        </div>
+        <button class="btn btn-danger btn-sm" type="submit" [disabled]="formCerrar.invalid || loading">Cerrar Solicitud</button>
+      </form>
+    </div>
+
+    <!-- Historial -->
+    <div class="historial-section">
+      <div class="acciones-header">Historial de la solicitud</div>
+      <div *ngIf="loadingHistorial" style="font-size:.8rem;color:#666;padding:10px 0">Cargando historial...</div>
+      <div class="historial-empty" *ngIf="!loadingHistorial && historial.length === 0">Sin eventos registrados.</div>
+      <div class="historial-timeline" *ngIf="!loadingHistorial && historial.length > 0">
+        <div class="hist-item" *ngFor="let h of historial">
+          <div class="hist-dot"></div>
+          <div class="hist-content">
+            <div class="hist-accion">{{ h.accion }}</div>
+            <div class="hist-meta">
+              <span>{{ h.usuario }}</span>
+              <span>{{ h.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
+            </div>
+            <div class="hist-obs" *ngIf="h.observaciones">{{ h.observaciones }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" (click)="cerrar.emit()">Cerrar</button>
+    </div>
+  </div>
+</div>

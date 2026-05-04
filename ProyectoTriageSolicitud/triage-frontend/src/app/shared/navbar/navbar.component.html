@@ -1,0 +1,32 @@
+<nav class="navbar">
+  <div class="navbar-brand">
+    <span class="brand-icon">◈</span>
+    <span class="brand-name">{{ title }}</span>
+  </div>
+
+  <div class="navbar-links">
+    <!-- Estudiante -->
+    <ng-container *ngIf="rol === RolUsuario.ESTUDIANTE">
+      <a class="nav-link" routerLink="/usuario/mis-solicitudes" routerLinkActive="active">Mis Solicitudes</a>
+      <a class="nav-link" routerLink="/usuario/crear-solicitud" routerLinkActive="active">Nueva Solicitud</a>
+    </ng-container>
+
+    <!-- Funcionario -->
+    <ng-container *ngIf="rol === RolUsuario.FUNCIONARIO">
+      <a class="nav-link" routerLink="/funcionario/solicitudes" routerLinkActive="active">Solicitudes</a>
+    </ng-container>
+
+    <!-- Admin / Coordinador -->
+    <ng-container *ngIf="rol === RolUsuario.ADMIN || rol === RolUsuario.COORDINADOR">
+      <a class="nav-link" routerLink="/admin/solicitudes" routerLinkActive="active">Solicitudes</a>
+      <a class="nav-link" routerLink="/admin/historial" routerLinkActive="active">Historial</a>
+    </ng-container>
+  </div>
+
+  <div class="navbar-user">
+    <div class="rol-badge">{{ rolLabel }}</div>
+    <button class="btn-logout" (click)="logout()" title="Cerrar sesión">
+      <span>&#x2192;</span> Salir
+    </button>
+  </div>
+</nav>

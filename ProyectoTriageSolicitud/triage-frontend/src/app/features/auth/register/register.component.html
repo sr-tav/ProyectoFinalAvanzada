@@ -1,0 +1,50 @@
+<div class="auth-bg">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="login-card">
+    <div class="card-header">
+      <div class="logo-mark"><span class="logo-icon">◈</span></div>
+      <h1 class="card-title">SOLICITAR ACCESO</h1>
+      <p class="card-subtitle">Triage Académico · UniQuindío</p>
+    </div>
+
+    <div class="card-body">
+      <div class="alert alert-success" *ngIf="submitted">
+        ✓ Solicitud enviada. El administrador activará tu cuenta.
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" *ngIf="!submitted">
+        <div class="field-group">
+          <label class="field-label">Nombre completo</label>
+          <div class="input-wrapper">
+            <span class="input-icon">◉</span>
+            <input class="field-input" formControlName="nombre" placeholder="Tu nombre" />
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Correo institucional</label>
+          <div class="input-wrapper">
+            <span class="input-icon">✉</span>
+            <input class="field-input" type="email" formControlName="correo" placeholder="usuario@uniquindio.edu.co" />
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Identificación</label>
+          <div class="input-wrapper">
+            <span class="input-icon">#</span>
+            <input class="field-input" formControlName="identificacion" placeholder="Cédula o código estudiantil" />
+          </div>
+        </div>
+
+        <button class="btn-login" type="submit" [disabled]="form.invalid">SOLICITAR CUENTA</button>
+      </form>
+
+      <div class="divider"><span>¿Ya tienes acceso?</span></div>
+      <a class="link-register" routerLink="/auth/login">Iniciar sesión</a>
+    </div>
+  </div>
+</div>

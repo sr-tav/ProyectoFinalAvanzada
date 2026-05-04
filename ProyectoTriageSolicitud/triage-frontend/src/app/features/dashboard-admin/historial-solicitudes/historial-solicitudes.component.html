@@ -1,0 +1,68 @@
+<app-navbar title="Triage Académico — Administración"></app-navbar>
+
+<div class="page-wrapper">
+  <div class="page-content">
+    <h1 class="page-title">Historial de Solicitudes</h1>
+
+    <div class="filter-bar card" style="padding:14px 18px;margin-bottom:14px">
+      <div class="filter-label">Filtrar:</div>
+      <select [(ngModel)]="filtroTipo">
+        <option value="">Todos los tipos</option>
+        <option *ngFor="let t of tipos" [value]="t">{{ tipoLabels[t] }}</option>
+      </select>
+      <select [(ngModel)]="filtroPrioridad">
+        <option value="">Todas las prioridades</option>
+        <option *ngFor="let p of prioridades" [value]="p">{{ p }}</option>
+      </select>
+      <button class="btn btn-primary btn-sm" (click)="aplicarFiltros()">Aplicar</button>
+      <button class="btn btn-ghost btn-sm" (click)="limpiarFiltros()">Limpiar</button>
+    </div>
+
+    <div class="empty-state card" *ngIf="loading"><p>Cargando...</p></div>
+    <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+    <div class="historial-list" *ngIf="!loading">
+      <div class="historial-item card" *ngFor="let s of solicitudes">
+        <div class="item-header" (click)="toggleHistorial(s)">
+          <div class="item-info">
+            <span class="item-id">#{{ s.id }}</span>
+            <span class="item-tipo">{{ tipoLabels[s.tipo] }}</span>
+            <span [class]="badgeEstado(s.estado)">{{ s.estado }}</span>
+            <span *ngIf="s.prioridad" [class]="badgePrioridad(s.prioridad)">{{ s.prioridad }}</span>
+          </div>
+          <div class="item-meta">
+            <span>{{ s.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</span>
+            <span class="expand-icon">{{ solicitudExpandida === s.id ? '▲' : '▼' }}</span>
+          </div>
+        </div>
+
+        <div class="item-body" *ngIf="solicitudExpandida === s.id">
+          <p class="item-desc">{{ s.descripcion }}</p>
+
+          <div class="mini-label">Historial de eventos</div>
+          <div *ngIf="loadingHistorial && !historialMap[s.id]" style="font-size:.78rem;color:#666;padding:8px 0">Cargando...</div>
+          <div *ngIf="historialMap[s.id]?.length === 0" style="font-size:.78rem;color:#555;padding:8px 0">Sin eventos.</div>
+
+          <div class="timeline" *ngIf="(historialMap[s.id] || []).length > 0">
+            <div class="tl-item" *ngFor="let h of historialMap[s.id]">
+              <div class="tl-dot"></div>
+              <div class="tl-content">
+                <div class="tl-accion">{{ h.accion }}</div>
+                <div class="tl-meta">
+                  <span>{{ h.usuario }}</span>
+                  <span>{{ h.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
+                </div>
+                <div class="tl-obs" *ngIf="h.observaciones">{{ h.observaciones }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state" *ngIf="solicitudes.length === 0">
+        <div class="empty-icon">📂</div>
+        <p>No hay solicitudes registradas.</p>
+      </div>
+    </div>
+  </div>
+</div>

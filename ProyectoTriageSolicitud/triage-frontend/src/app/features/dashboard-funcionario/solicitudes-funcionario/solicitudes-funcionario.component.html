@@ -1,0 +1,73 @@
+<app-navbar title="Triage Académico — Funcionario"></app-navbar>
+
+<div class="page-wrapper">
+  <div class="page-content">
+    <h1 class="page-title">Solicitudes Asignadas</h1>
+
+    <!-- Filtros -->
+    <div class="filter-bar card" style="padding:16px 20px">
+      <div class="filter-label">Filtrar por:</div>
+      <select [(ngModel)]="filtroTipo">
+        <option value="">Todos los tipos</option>
+        <option *ngFor="let t of tipos" [value]="t">{{ tipoLabels[t] }}</option>
+      </select>
+      <select [(ngModel)]="filtroPrioridad">
+        <option value="">Todas las prioridades</option>
+        <option *ngFor="let p of prioridades" [value]="p">{{ p }}</option>
+      </select>
+      <button class="btn btn-primary btn-sm" (click)="aplicarFiltros()">Aplicar</button>
+      <button class="btn btn-ghost btn-sm" (click)="limpiarFiltros()">Limpiar</button>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card" style="margin-top:16px">
+      <div class="empty-state" *ngIf="loading"><p>Cargando...</p></div>
+      <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+      <div class="empty-state" *ngIf="!loading && solicitudes.length === 0">
+        <div class="empty-icon">✓</div>
+        <p>No hay solicitudes con los filtros seleccionados.</p>
+      </div>
+
+      <table class="data-table" *ngIf="!loading && solicitudes.length > 0">
+        <thead>
+          <tr>
+            <th>Prioridad</th>
+            <th>#</th>
+            <th>Tipo</th>
+            <th>Estado</th>
+            <th>Descripción</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of solicitudes" [class]="'row-prio-' + s.prioridad?.toLowerCase()">
+            <td>
+              <span *ngIf="s.prioridad" [class]="badgePrioridad(s.prioridad)">{{ s.prioridad }}</span>
+              <span *ngIf="!s.prioridad" style="color:#555;font-size:.75rem">—</span>
+            </td>
+            <td style="color:#666;font-size:.78rem">{{ s.id }}</td>
+            <td>{{ tipoLabels[s.tipo] ?? s.tipo }}</td>
+            <td><span [class]="badgeEstado(s.estado)">{{ s.estado }}</span></td>
+            <td class="desc-cell">{{ s.descripcion }}</td>
+            <td style="font-size:.76rem;color:#777">{{ s.fechaRegistro | date:'dd/MM/yy HH:mm' }}</td>
+            <td>
+              <button class="btn btn-primary btn-sm" (click)="abrirResponder(s)"
+                [disabled]="s.estado === 'CERRADA'">
+                Gestionar
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Responder -->
+<app-responder-solicitud
+  *ngIf="solicitudSeleccionada"
+  [solicitud]="solicitudSeleccionada"
+  (cerrar)="cerrarResponder()">
+</app-responder-solicitud>
