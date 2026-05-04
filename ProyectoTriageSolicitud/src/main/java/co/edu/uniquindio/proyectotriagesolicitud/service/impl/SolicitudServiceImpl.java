@@ -23,6 +23,8 @@ import co.edu.uniquindio.proyectotriagesolicitud.repository.SolicitudRepository;
 import co.edu.uniquindio.proyectotriagesolicitud.repository.UsuarioRepository;
 import co.edu.uniquindio.proyectotriagesolicitud.service.SolicitudService;
 import jakarta.transaction.Transactional;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,6 +44,8 @@ public class SolicitudServiceImpl implements SolicitudService {
         this.historialSolicitudRepository = historialSolicitudRepository;
         this.usuarioRepository = usuarioRepository;
     }
+
+
 
     @Override
     public SolicitudResponse registrarSolicitud(SolicitudRequest request) {
@@ -401,4 +405,6 @@ public class SolicitudServiceImpl implements SolicitudService {
         response.setObservaciones(historial.getObservacion());
         return response;
     }
+
+
 }
