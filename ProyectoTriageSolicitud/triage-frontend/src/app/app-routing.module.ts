@@ -6,6 +6,7 @@ import { RolUsuario } from './core/models/models';
 
 const routes: Routes = [
   { path: '', redirectTo: 'auth/login', pathMatch: 'full' },
+  { path: '', redirectTo: 'auth/register', pathMatch: 'full' },
   {
     path: 'auth',
     loadChildren: () =>
@@ -39,6 +40,11 @@ const routes: Routes = [
       ),
   },
   { path: '**', redirectTo: 'auth/login' },
+  {
+    path: 'auth',
+    loadChildren: () =>
+      import('./features/auth/auth.module').then((m) => m.AuthModule),
+  }
 ];
 
 @NgModule({

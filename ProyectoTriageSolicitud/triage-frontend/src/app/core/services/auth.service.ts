@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
-import { LoginRequest, LoginResponse, RolUsuario } from '../models/models';
+import {LoginRequest, LoginResponse, RegisterResponse, RolUsuario} from '../models/models';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -12,6 +12,16 @@ export class AuthService {
 
   login(body: LoginRequest): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.BASE}/login`, body).pipe(
+      tap((res) => {
+        localStorage.setItem('token', res.token);
+        localStorage.setItem('rol', res.rol);
+        localStorage.setItem('usuarioId', String(res.usuarioId));
+      })
+    );
+  }
+
+  register(body: RegisterResponse): Observable<RegisterResponse> {
+    return this.http.post<RegisterResponse>(`${this.BASE}/register`, body).pipe(
       tap((res) => {
         localStorage.setItem('token', res.token);
         localStorage.setItem('rol', res.rol);

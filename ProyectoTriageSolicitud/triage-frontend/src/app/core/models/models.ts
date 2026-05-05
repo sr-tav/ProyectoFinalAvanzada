@@ -79,12 +79,26 @@ export interface LoginResponse {
   rol: RolUsuario;
 }
 
+export interface RegisterResponse {
+  descripcion: string;
+  token: string;
+  tipo: string;
+  usuarioId: number;
+  rol: RolUsuario;
+}
+
 // ──────────────────────────────────────────────
 // Request DTOs
 // ──────────────────────────────────────────────
 
 export interface LoginRequest {
   correo: string;
+}
+
+export interface RegisterResponse {
+  nombre: string;
+  correo: string;
+  id: number;
 }
 
 export interface SolicitudRequest {
