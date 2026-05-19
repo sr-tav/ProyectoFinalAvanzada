@@ -23,6 +23,7 @@ export class ResponderSolicitudComponent implements OnInit {
   success = '';
 
   accionActiva: 'clasificar' | 'priorizar' | 'asignar' | 'iniciar' | 'atender' | 'cerrar' | null = null;
+  isAdmin = this.authService.isAdmin();
 
   tipos = Object.values(TipoSolicitud);
   prioridades = Object.values(Prioridad);
@@ -62,28 +63,28 @@ export class ResponderSolicitudComponent implements OnInit {
     });
   }
 
-  puedeClasificar(): boolean { return this.solicitud.estado === EstadoSolicitud.REGISTRADA; }
-  puedePriorizar(): boolean  { return this.solicitud.estado === EstadoSolicitud.CLASIFICADA; }
-  puedeAsignar(): boolean    { return this.solicitud.estado === EstadoSolicitud.CLASIFICADA; }
-  puedeIniciar(): boolean    { return this.solicitud.estado === EstadoSolicitud.CLASIFICADA; }
-  puedeAtender(): boolean    { return this.solicitud.estado === EstadoSolicitud.EN_ATENCION; }
-  puedeCerrar(): boolean     { return this.solicitud.estado === EstadoSolicitud.ATENDIDA; }
-
   ejecutar(accion: string): void {
     this.loading = true;
     this.error = '';
     this.success = '';
     const id = this.solicitud.id;
     const v = this.solicitud.version;
+    const usuarioResponsableId = this.authService.getUsuarioId();
 
     const obs$ = (() => {
       switch (accion) {
-        case 'clasificar': return this.solicitudService.clasificar(id, { ...this.formClasificar.value, version: v });
-        case 'priorizar':  return this.solicitudService.priorizar(id, { ...this.formPriorizar.value, version: v });
-        case 'asignar':    return this.solicitudService.asignar(id, { responsableId: Number(this.formAsignar.value.responsableId), version: v });
-        case 'iniciar':    return this.solicitudService.iniciarAtencion(id, { version: v });
-        case 'atender':    return this.solicitudService.atender(id, { ...this.formAtender.value, version: v });
-        case 'cerrar':     return this.solicitudService.cerrar(id, { ...this.formCerrar.value, version: v });
+        case 'clasificar': return this.solicitudService.clasificar(id, { ...this.formClasificar.value, usuarioResponsableId, version: v });
+        case 'priorizar':  return this.solicitudService.priorizar(id, { ...this.formPriorizar.value, usuarioResponsableId, version: v });
+        case 'asignar':
+          return this.solicitudService.asignar(id, {
+            responsableId: Number(this.formAsignar.value.responsableId),
+            usuarioResponsableId,
+            observacion: 'Responsable asignado desde el panel',
+            version: v
+          });
+        case 'iniciar':    return this.solicitudService.iniciarAtencion(id, { usuarioResponsableId, version: v });
+        case 'atender':    return this.solicitudService.atender(id, { ...this.formAtender.value, usuarioResponsableId, version: v });
+        case 'cerrar':     return this.solicitudService.cerrar(id, { ...this.formCerrar.value, usuarioResponsableId, version: v });
         default:           throw new Error('Acción inválida');
       }
     })();
@@ -105,4 +106,25 @@ export class ResponderSolicitudComponent implements OnInit {
 
   badgeEstado(e: string): string { return `badge badge-${e.toLowerCase().replace('_','-')}`; }
   badgePrioridad(p: string): string { return `badge badge-${p.toLowerCase()}`; }
+
+  puedeClasificar(): boolean {
+    return this.solicitud.estado === EstadoSolicitud.REGISTRADA;
+  }
+  puedePriorizar(): boolean {
+    return this.solicitud.estado === EstadoSolicitud.CLASIFICADA
+      || this.solicitud.estado === EstadoSolicitud.EN_ATENCION;
+  }
+  puedeAsignar(): boolean {
+    return this.solicitud.estado === EstadoSolicitud.CLASIFICADA;
+  }
+  puedeIniciar(): boolean {
+    return this.solicitud.estado === EstadoSolicitud.CLASIFICADA
+      && this.solicitud.responsableId !== null;
+  }
+  puedeAtender(): boolean {
+    return this.solicitud.estado === EstadoSolicitud.EN_ATENCION;
+  }
+  puedeCerrar(): boolean {
+    return this.solicitud.estado === EstadoSolicitud.ATENDIDA;
+  }
 }

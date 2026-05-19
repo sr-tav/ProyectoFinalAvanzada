@@ -74,4 +74,19 @@ public class AuthController {
                 "rol", null
         ));
     }
+
+    @GetMapping("/cuenta/{id}")
+    public ResponseEntity<?> obtenerCuenta(@PathVariable Long id) {
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        return ResponseEntity.ok(Map.of(
+                "nombre", usuario.getNombre(),
+                "correo", usuario.getCorreo(),
+                "tipo", usuario.getRolUsuario().name(),
+                "estado", usuario.isActivo() ? "ACTIVO" : "INACTIVO",
+                "usuarioId", usuario.getId(),
+                "rol", usuario.getRolUsuario().name()
+        ));
+    }
 }

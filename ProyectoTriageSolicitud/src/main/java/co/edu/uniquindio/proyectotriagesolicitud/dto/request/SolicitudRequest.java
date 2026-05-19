@@ -11,6 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SolicitudRequest {
+
     @NotNull(message = "el tipo de solicitud es obligatorio")
     private TipoSolicitud tipo;
 
@@ -21,6 +22,6 @@ public class SolicitudRequest {
     @NotNull(message = "el canal de origen es obligatorio")
     private CanalOrigen canalOrigen;
 
-    @NotBlank(message = "el id del solicitante es obligatorio")
+    @NotNull(message = "el id del solicitante es obligatorio")
     private Long solicitanteId;
 }

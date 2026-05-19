@@ -39,6 +39,7 @@ public interface SolicitudService {
             EstadoSolicitud estado,
             TipoSolicitud tipo,
             Long responsableId,
+            Long solicitanteId,
             Prioridad prioridad
     );
 

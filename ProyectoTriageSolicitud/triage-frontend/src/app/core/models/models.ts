@@ -86,6 +86,15 @@ export interface RegisterResponse {
   usuarioId: number;
   rol: RolUsuario;
 }
+export interface CuentaResponse {
+  nombre: string;
+  correo: string;
+  tipo: string;
+  estado: string;
+  usuarioId: number;
+  rol: RolUsuario;
+}
+
 
 // ──────────────────────────────────────────────
 // Request DTOs
@@ -101,6 +110,10 @@ export interface RegisterResponse {
   id: number;
 }
 
+export interface CuentaRequest {
+  correo: string;
+}
+
 export interface SolicitudRequest {
   tipo: TipoSolicitud;
   descripcion: string;
@@ -110,31 +123,38 @@ export interface SolicitudRequest {
 
 export interface ClasificarRequest {
   tipo: TipoSolicitud;
+  usuarioResponsableId: number | null;
   version: number;
 }
 
 export interface PriorizarRequest {
   prioridad: Prioridad;
   justificacion: string;
+  usuarioResponsableId: number | null;
   version: number;
 }
 
 export interface AsignarRequest {
-  responsableId: number;
-  version: number;
+  responsableId: number | null;
+  usuarioResponsableId: number | null;
+  observacion?: string | null;
+  version: number | null;
 }
 
 export interface AtenderRequest {
   observacion: string;
+  usuarioResponsableId: number | null;
   version: number;
 }
 
 export interface CerrarRequest {
   observacion: string;
+  usuarioResponsableId: number | null;
   version: number;
 }
 
 export interface VersionRequest {
+  usuarioResponsableId: number | null;
   version: number;
 }
 

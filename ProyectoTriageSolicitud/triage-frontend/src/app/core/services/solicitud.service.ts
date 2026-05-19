@@ -23,13 +23,15 @@ export class SolicitudService {
     estado?: EstadoSolicitud;
     tipo?: TipoSolicitud;
     responsableId?: number;
+    solicitanteId?: number;
     prioridad?: Prioridad;
   }): Observable<SolicitudResponse[]> {
     let params = new HttpParams();
-    if (filters?.estado)        params = params.set('estado', filters.estado);
-    if (filters?.tipo)          params = params.set('tipo', filters.tipo);
-    if (filters?.responsableId) params = params.set('responsableId', String(filters.responsableId));
-    if (filters?.prioridad)     params = params.set('prioridad', filters.prioridad);
+    if (filters?.estado)         params = params.set('estado', filters.estado);
+    if (filters?.tipo)           params = params.set('tipo', filters.tipo);
+    if (filters?.responsableId)  params = params.set('responsableId', String(filters.responsableId));
+    if (filters?.solicitanteId)  params = params.set('solicitanteId', String(filters.solicitanteId));
+    if (filters?.prioridad)      params = params.set('prioridad', filters.prioridad);
     return this.http.get<SolicitudResponse[]>(this.BASE, { params });
   }
 

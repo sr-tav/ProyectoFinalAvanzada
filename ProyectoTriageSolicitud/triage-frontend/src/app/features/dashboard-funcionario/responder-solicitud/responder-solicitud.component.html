@@ -22,12 +22,55 @@
     <!-- Acciones disponibles -->
     <div class="acciones-header">Acciones disponibles</div>
     <div class="acciones-bar">
-      <button class="btn btn-ghost btn-sm" [class.active]="accionActiva==='clasificar'" (click)="accionActiva = puedeClasificar() ? 'clasificar' : null" [disabled]="!puedeClasificar()">Clasificar</button>
-      <button class="btn btn-ghost btn-sm" [class.active]="accionActiva==='priorizar'"  (click)="accionActiva = puedePriorizar()  ? 'priorizar'  : null" [disabled]="!puedePriorizar()">Priorizar</button>
-      <button class="btn btn-ghost btn-sm" [class.active]="accionActiva==='asignar'"    (click)="accionActiva = puedeAsignar()    ? 'asignar'    : null" [disabled]="!puedeAsignar()">Asignar</button>
-      <button class="btn btn-ghost btn-sm" [class.active]="accionActiva==='iniciar'"    (click)="accionActiva = puedeIniciar()    ? 'iniciar'    : null" [disabled]="!puedeIniciar()">Iniciar Atención</button>
-      <button class="btn btn-ghost btn-sm" [class.active]="accionActiva==='atender'"    (click)="accionActiva = puedeAtender()    ? 'atender'    : null" [disabled]="!puedeAtender()">Registrar Atención</button>
-      <button class="btn btn-danger btn-sm" [class.active]="accionActiva==='cerrar'"   (click)="accionActiva = puedeCerrar()     ? 'cerrar'     : null" [disabled]="!puedeCerrar()">Cerrar</button>
+      <button
+        class="btn btn-ghost btn-sm"
+        [class.active]="accionActiva==='clasificar'"
+        (click)="accionActiva = puedeClasificar() ? 'clasificar' : null"
+        [disabled]="!puedeClasificar()">
+        Clasificar
+      </button>
+
+      <button
+        *ngIf="isAdmin"
+        class="btn btn-ghost btn-sm"
+        [class.active]="accionActiva==='priorizar'"
+        (click)="accionActiva = puedePriorizar() ? 'priorizar' : null"
+        [disabled]="!puedePriorizar()">
+        Priorizar
+      </button>
+
+      <button
+        *ngIf="isAdmin"
+        class="btn btn-ghost btn-sm"
+        [class.active]="accionActiva==='asignar'"
+        (click)="accionActiva = puedeAsignar() ? 'asignar' : null"
+        [disabled]="!puedeAsignar()">
+        Asignar
+      </button>
+
+      <button
+        class="btn btn-ghost btn-sm"
+        [class.active]="accionActiva==='iniciar'"
+        (click)="accionActiva = puedeIniciar() ? 'iniciar' : null"
+        [disabled]="!puedeIniciar()">
+        Iniciar Atención
+      </button>
+
+      <button
+        class="btn btn-ghost btn-sm"
+        [class.active]="accionActiva==='atender'"
+        (click)="accionActiva = puedeAtender() ? 'atender' : null"
+        [disabled]="!puedeAtender()">
+        Registrar Atención
+      </button>
+
+      <button
+        class="btn btn-danger btn-sm"
+        [class.active]="accionActiva==='cerrar'"
+        (click)="accionActiva = puedeCerrar() ? 'cerrar' : null"
+        [disabled]="!puedeCerrar()">
+        Cerrar
+      </button>
     </div>
 
     <!-- Paneles de acción -->

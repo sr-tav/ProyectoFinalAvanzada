@@ -1,0 +1,40 @@
+<app-navbar title="Triage Académico — Administración"></app-navbar>
+
+<div class="perfil-page">
+  <section class="perfil-card">
+    <div class="perfil-header">
+        <h1>Mi cuenta</h1>
+        <p>Información del usuario que inició sesión</p>
+      </div>
+
+    <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+    <div class="loading" *ngIf="isLoading">Cargando información...</div>
+
+    <div class="perfil-grid" *ngIf="!isLoading && cuenta">
+      <div class="info-item">
+        <span class="label">ID</span>
+        <span class="value">#{{ cuenta.usuarioId }}</span>
+      </div>
+
+      <div class="info-item">
+        <span class="label">Nombre</span>
+        <span class="value">{{ cuenta.nombre }}</span>
+      </div>
+
+      <div class="info-item">
+        <span class="label">Correo</span>
+        <span class="value">{{ cuenta.correo }}</span>
+      </div>
+
+      <div class="info-item">
+        <span class="label">Estado</span>
+        <span class="value estado">{{ cuenta.estado }}</span>
+      </div>
+
+      <div class="info-item">
+        <span class="label">Rol</span>
+        <span class="value rol">{{ cuenta.rol }}</span>
+      </div>
+    </div>
+  </section>
+</div>

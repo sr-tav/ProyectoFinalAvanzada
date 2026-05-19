@@ -275,6 +275,7 @@ public class SolicitudServiceImpl implements SolicitudService {
             EstadoSolicitud estado,
             TipoSolicitud tipo,
             Long responsableId,
+            Long solicitanteId,
             Prioridad prioridad) {
 
         List<SolicitudAcademica> lista = solicitudRepository.findAll();
@@ -284,6 +285,8 @@ public class SolicitudServiceImpl implements SolicitudService {
                 .filter(s -> tipo == null || s.getTipo() == tipo)
                 .filter(s -> responsableId == null ||
                         (s.getResponsableId() != null && s.getResponsableId().equals(responsableId)))
+                .filter(s -> solicitanteId == null ||
+                        (s.getSolicitanteId() != null && s.getSolicitanteId().equals(solicitanteId)))
                 .filter(s -> prioridad == null || s.getPrioridad() == prioridad)
                 .map(this::toSolicitudResponse)
                 .toList();

@@ -95,10 +95,11 @@ public class SolicitudController {
             @RequestParam(required = false) EstadoSolicitud estado,
             @RequestParam(required = false) TipoSolicitud tipo,
             @RequestParam(required = false) Long responsableId,
+            @RequestParam(required = false) Long solicitanteId,
             @RequestParam(required = false) Prioridad prioridad) {
 
         return ResponseEntity.ok(
-                solicitudService.listarSolicitudes(estado, tipo, responsableId, prioridad)
+                solicitudService.listarSolicitudes(estado, tipo, responsableId, solicitanteId, prioridad)
         );
     }
 

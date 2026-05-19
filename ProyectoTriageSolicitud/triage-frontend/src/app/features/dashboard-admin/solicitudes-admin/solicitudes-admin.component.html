@@ -43,7 +43,7 @@
       <button class="btn btn-ghost btn-sm" (click)="limpiarFiltros()">Limpiar</button>
     </div>
 
-    <!-- Tabla -->
+    <!-- Tabla solicitudes activas -->
     <div class="card">
       <div class="empty-state" *ngIf="loading"><p>Cargando...</p></div>
       <div class="alert alert-error" *ngIf="error">{{ error }}</div>
@@ -79,6 +79,7 @@
         </tbody>
       </table>
     </div>
+
   </div>
 </div>
 

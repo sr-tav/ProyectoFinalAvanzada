@@ -9,6 +9,8 @@ import { SolicitudResponse, TipoSolicitud, Prioridad, EstadoSolicitud } from '..
 })
 export class SolicitudesAdminComponent implements OnInit {
   solicitudes: SolicitudResponse[] = [];
+  historialSolicitudes: SolicitudResponse[] = [];
+  mostrarHistorial = false;
   loading = true;
   error = '';
   filtroTipo: TipoSolicitud | '' = '';
@@ -18,7 +20,7 @@ export class SolicitudesAdminComponent implements OnInit {
 
   tipos = Object.values(TipoSolicitud);
   prioridades = Object.values(Prioridad);
-  estados = Object.values(EstadoSolicitud);
+  estados = Object.values(EstadoSolicitud).filter(e => e !== EstadoSolicitud.CERRADA);
 
   tipoLabels: Record<string, string> = {
     REGISTRO_ASIGNATURAS: 'Registro', HOMOLOGACION: 'Homologación',
@@ -35,11 +37,16 @@ export class SolicitudesAdminComponent implements OnInit {
     this.solicitudService.listar({
       tipo: this.filtroTipo || undefined,
       prioridad: this.filtroPrioridad || undefined,
-      estado: this.filtroEstado || undefined,
     }).subscribe({
       next: (data) => {
         const orden: Record<string, number> = { CRITICA: 0, ALTA: 1, MEDIA: 2, BAJA: 3 };
-        this.solicitudes = data.sort((a, b) => (orden[a.prioridad] ?? 9) - (orden[b.prioridad] ?? 9));
+        const sorted = data.sort((a, b) => (orden[a.prioridad] ?? 9) - (orden[b.prioridad] ?? 9));
+        this.historialSolicitudes = sorted;
+        let activas = sorted.filter(s => s.estado !== EstadoSolicitud.CERRADA);
+        if (this.filtroEstado) {
+          activas = activas.filter(s => s.estado === this.filtroEstado);
+        }
+        this.solicitudes = activas;
         this.loading = false;
       },
       error: (err) => { this.error = err.error?.message ?? 'Error.'; this.loading = false; },
@@ -57,7 +64,7 @@ export class SolicitudesAdminComponent implements OnInit {
       total: this.solicitudes.length,
       criticas: this.solicitudes.filter(s => s.prioridad === 'CRITICA').length,
       enAtencion: this.solicitudes.filter(s => s.estado === EstadoSolicitud.EN_ATENCION).length,
-      cerradas: this.solicitudes.filter(s => s.estado === EstadoSolicitud.CERRADA).length,
+      cerradas: this.historialSolicitudes.filter(s => s.estado === EstadoSolicitud.CERRADA).length,
     };
   }
 

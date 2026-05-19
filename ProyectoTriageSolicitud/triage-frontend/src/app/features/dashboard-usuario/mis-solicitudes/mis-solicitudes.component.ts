@@ -31,9 +31,8 @@ export class MisSolicitudesComponent implements OnInit {
 
   cargar(): void {
     this.loading = true;
-    const responsableId = this.authService.getUsuarioId()!;
-    // TODO: filtrar por solicitanteId cuando el backend lo soporte
-    this.solicitudService.listar({ responsableId }).subscribe({
+    const solicitanteId = this.authService.getUsuarioId()!;
+    this.solicitudService.listar({ solicitanteId }).subscribe({
       next: (data) => { this.solicitudes = data; this.loading = false; },
       error: (err) => { this.error = err.error?.message ?? 'Error al cargar solicitudes.'; this.loading = false; },
     });
