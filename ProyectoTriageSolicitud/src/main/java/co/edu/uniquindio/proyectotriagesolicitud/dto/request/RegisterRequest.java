@@ -8,4 +8,5 @@ import lombok.Setter;
 public class RegisterRequest {
     private String correo;
     private String nombre;
+    private String password;
 }

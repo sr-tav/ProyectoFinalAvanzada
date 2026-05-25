@@ -9,6 +9,7 @@ import co.edu.uniquindio.proyectotriagesolicitud.repository.UsuarioRepository;
 import co.edu.uniquindio.proyectotriagesolicitud.service.impl.SolicitudServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -22,6 +23,7 @@ public class AuthController {
     private final UsuarioRepository usuarioRepository;
     private final SolicitudServiceImpl  solicitudService;
     private final JwtUtils jwtUtils;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
@@ -31,6 +33,11 @@ public class AuthController {
 
         if (!usuario.isActivo()) {
             throw new RuntimeException("Usuario inactivo");
+        }
+
+        if (usuario.getPassword() != null && (request.getPassword() == null
+                || !passwordEncoder.matches(request.getPassword(), usuario.getPassword()))) {
+            throw new RuntimeException("Credenciales inválidas");
         }
 
         String token = jwtUtils.generarToken(usuario);
@@ -52,6 +59,9 @@ public class AuthController {
             usuario1.setNombre(request.getNombre());
             usuario1.setRolUsuario(RolUsuario.ESTUDIANTE);
             usuario1.setActivo(true);
+            if (request.getPassword() != null && !request.getPassword().isBlank()) {
+                usuario1.setPassword(passwordEncoder.encode(request.getPassword()));
+            }
 
             usuarioRepository.save(usuario1);
             String token = jwtUtils.generarToken(usuario1);

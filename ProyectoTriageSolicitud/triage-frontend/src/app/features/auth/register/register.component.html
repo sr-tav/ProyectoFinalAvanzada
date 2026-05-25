@@ -40,6 +40,17 @@
           </div>
         </div>
 
+        <div class="field-group">
+          <label class="field-label">Contraseña</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔒</span>
+            <input class="field-input" type="password" formControlName="password" placeholder="••••••••" autocomplete="new-password" />
+          </div>
+          <span class="field-error" *ngIf="form.get('password')?.invalid && form.get('password')?.touched">
+            La contraseña debe tener al menos 6 caracteres
+          </span>
+        </div>
+
         <button class="btn-login" type="submit" [disabled]="form.invalid">SOLICITAR CUENTA</button>
       </form>
 

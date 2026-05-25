@@ -35,6 +35,26 @@
           </span>
         </div>
 
+        <div class="field-group">
+          <label class="field-label">Contraseña</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔒</span>
+            <input
+              class="field-input"
+              type="password"
+              formControlName="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+            />
+          </div>
+          <span
+            class="field-error"
+            *ngIf="form.get('password')?.invalid && form.get('password')?.touched"
+          >
+            La contraseña debe tener al menos 6 caracteres
+          </span>
+        </div>
+
         <div class="alert-error" *ngIf="error">{{ error }}</div>
 
         <button class="btn-login" type="submit" [disabled]="loading">

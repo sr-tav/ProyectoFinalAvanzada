@@ -61,8 +61,9 @@ export class CrearSolicitudComponent implements OnInit {
 
   aplicarSugerencia(): void {
     if (!this.sugerenciaIA) return;
-    this.form.patchValue({ tipo: this.sugerenciaIA.tipoSugerido });
+    const tipo = this.sugerenciaIA.tipoSugerido;
     this.sugerenciaIA = null;
+    setTimeout(() => this.form.get('tipo')?.setValue(tipo));
   }
 
   onSubmit(): void {
