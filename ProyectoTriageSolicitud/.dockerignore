@@ -1,0 +1,8 @@
+target
+triage-frontend/node_modules
+triage-frontend/dist
+triage-frontend/.angular
+.git
+.idea
+.vscode
+*.iml
