@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://TU-BACKEND-EN-RENDER.onrender.com/api',
+  apiUrl: 'https://proyectofinalavanzada-gkaq.onrender.com/api',
 };
